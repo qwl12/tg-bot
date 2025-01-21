@@ -1,8 +1,10 @@
 const { Bot, InlineKeyboard } = require('grammy');
-
+const { rpsKeyboard } = require('./keyboards/RPSKeyboard');
 const bot = new Bot('7744251076:AAEvkaRlygAhQFE2IYTL4mkCwGfmLLte9TE');
-
-
+const { RPSplay } = require('./src/RPSgame');
+const { flipcoin } = require('./src/flipcoin');
+// const { help } = require("./src/help");
+const {startGuessGame, handleGuess} = require('./src/findNum');
 //старт
 bot.command('start',(ctx) => {
     const keyboard = new InlineKeyboard()
@@ -15,49 +17,45 @@ bot.command('start',(ctx) => {
     ctx.reply('Привет я саня шляпик, если ты еще тут, то посмотри во что я умею играть:', {reply_markup: keyboard});
 });
 
+// ОРЕЛ ИЛИ РЕШКА
 bot.command('flipcoin', (ctx) =>{
    const keyboard = new InlineKeyboard().text('Решка', 'reshka').text('Орел', 'orel');
    ctx.reply('Выбери орел или решка', {reply_markup: keyboard});
 })
 
-//обработка кнопок
-bot.on('callback_query:data', async (ctx) => {
-    
-    const data = ctx.callbackQuery.data;    
-
-        if( data === 'reshka' || data === 'orel') {
-            const result = Math.random() < 0.5 ? 'reshka' : 'orel';
-            const userChoice = data === 'orel' ? 'Орел' : 'Решка';
-            const botResult = result === 'orel' ? 'Орел' : 'Решка';
-               
-            const resultMessage = userChoice === botResult
-            ? `ты выбрал ${userChoice}, и угадал(а) Сыграем еще?`
-            :  `ты выбрал ${userChoice}, но выпал ${botResult}, Сыграем еще?`;
-
-
-            const playAgainKeyboard = new InlineKeyboard()
-            .text('да', 'flipcoin')
-            .text('нет', 'start');
-
-            await ctx.reply(resultMessage, {reply_markup: playAgainKeyboard});
-        } else if (data === 'flipcoin') {
-            ctx.reply('Сыграем в орел и решку? /flipcoin')
-        } else if (data === 'start') {
-            ctx.reply ('Перейдем в начало. /start')
-        }
-
-
+// КАМЕНЬ НОЖНИЦЫ БУМАГА
+bot.command("rps", async (ctx) => {
+    await ctx.reply("Играем в 'Камень, ножницы, бумага'! Выберите свой ход:", {
+      reply_markup: rpsKeyboard,
     });
-
-
-
-
-
-
-//помощь
-bot.command('help',(ctx) => {
-    ctx.reply('/shlyapa - привет шляпик\n/echo - передразнить тебя\n/jonkler - щутка :)');
 });
+
+
+//обработка кнопок
+bot.on("callback_query:data", async (ctx) => {
+    const data = ctx.callbackQuery.data;
+
+    if (["rock", "scissors", "paper"].includes(data)) {
+      const resultMessage = RPSplay(data);
+      await ctx.reply(resultMessage);
+    }
+    if (["orel","reshka"].includes(data)) {
+        const resultMessage = flipcoin(data);
+        await ctx.reply(resultMessage);
+    }
+    if('help'.includes(data)) {
+        const resultMessage = help(data);
+        ctx.reply(resultMessage);
+    }
+});
+bot.command("guess", (ctx) => {
+    startGuessGame(ctx);
+  });
+
+bot.on("message", (ctx) => {
+    handleGuess(ctx);
+  });
+
 
 //повторить сообщение
 bot.command('echo',(ctx) => {
