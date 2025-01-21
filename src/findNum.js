@@ -24,7 +24,7 @@ function handleGuess(ctx) {
   const targetNumber = randomNumbers[chatId];
 
   if (guessedNumber === targetNumber) {
-    ctx.reply(`🎉 Поздравляю! Вы угадали число: ${targetNumber}`);
+    ctx.reply(`🎉 WW! Вы угадали число: ${targetNumber}`);
     delete randomNumbers[chatId];
     delete gameState[chatId]; 
   } else if (guessedNumber < targetNumber) {

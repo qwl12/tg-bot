@@ -15,8 +15,7 @@ function RPSplay (userChoice) {
         result = 'WW!';
     }
 
-    return `Ваш выбор: ${getResult(userChoice)}Выбор бота: ${getResult(botChoice)}
-    
+    return `Ваш выбор: ${getResult(userChoice)}\nВыбор бота: ${getResult(botChoice)}
     \n${result}`;
 }
 function getResult(choice) {

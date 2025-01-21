@@ -3,16 +3,20 @@ const { rpsKeyboard } = require('./keyboards/RPSKeyboard');
 const bot = new Bot('7744251076:AAEvkaRlygAhQFE2IYTL4mkCwGfmLLte9TE');
 const { RPSplay } = require('./src/RPSgame');
 const { flipcoin } = require('./src/flipcoin');
-// const { help } = require("./src/help");
+const { handleHelpCommand } = require("./src/help");
 const {startGuessGame, handleGuess} = require('./src/findNum');
+
+
+
 //старт
 bot.command('start',(ctx) => {
     const keyboard = new InlineKeyboard()
     .text('Орел и решка', 'flipcoin')
-    .text('Камень, ножница, бумага', 'option2')
-    .text('Угадай число', 'option3')
+    .text('Камень, ножница, бумага', 'RPS')
+    .text('Угадай число', 'guess')
     .row()
-    .text('помощь', 'help');
+    .text('Помощь','help');
+
     
     ctx.reply('Привет я саня шляпик, если ты еще тут, то посмотри во что я умею играть:', {reply_markup: keyboard});
 });
@@ -30,8 +34,43 @@ bot.command("rps", async (ctx) => {
     });
 });
 
+// Угадай число
+bot.command("guess", (ctx) => {
+    startGuessGame(ctx);
+  });
 
-//обработка кнопок
+//btn`s
+bot.callbackQuery("guess", (ctx) => {
+  ctx.answerCallbackQuery(); 
+  ctx.reply("Вы выбрали игру 'Угадай число'. Введите /guess, чтобы начать!");
+});
+bot.callbackQuery("flipcoin", (ctx) => {
+  ctx.answerCallbackQuery(); 
+  ctx.reply("Вы выбрали игру 'Орел и решка'. Введите /flipcoin, чтобы начать!");
+});
+bot.callbackQuery("RPS", (ctx) => {
+    ctx.answerCallbackQuery(); 
+    ctx.reply("Вы выбрали игру 'Камень ножницы бумага'. Введите /RPS, чтобы начать!");
+  });
+  bot.callbackQuery("help", (ctx) => {
+
+    ctx.reply(`Привет! Я ваш игровой бот. Вот что я умею:
+  
+  🎮 **Игры**:
+  - /guess — Угадай число от 1 до 100
+  - /rps — Камень, ножницы, бумага
+  - /coin — Орёл или решка
+  
+  🛠 **Дополнительно**:
+  - /start — Начать общение с ботом
+  - /help — Показать это сообщение
+  
+  Выберите команду и начните игру! 🎉
+    `)
+  });
+
+
+//обработка кнопок для игр
 bot.on("callback_query:data", async (ctx) => {
     const data = ctx.callbackQuery.data;
 
@@ -43,13 +82,12 @@ bot.on("callback_query:data", async (ctx) => {
         const resultMessage = flipcoin(data);
         await ctx.reply(resultMessage);
     }
-    if('help'.includes(data)) {
-        const resultMessage = help(data);
-        ctx.reply(resultMessage);
-    }
+
 });
-bot.command("guess", (ctx) => {
-    startGuessGame(ctx);
+
+
+bot.command("help", (ctx) => {
+    handleHelpCommand(ctx);
   });
 
 bot.on("message", (ctx) => {
